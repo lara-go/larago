@@ -144,14 +144,7 @@ func (r *Request) Query() url.Values {
 
 // ReadForm unmarshal form request to the structure.
 func (r *Request) ReadForm(target interface{}) error {
-	decoder := schema.NewDecoder()
-
-	// Decode form values.
-	if err := decoder.Decode(target, r.FormValues()); err != nil {
-		return err
-	}
-
-	return nil
+	return r.decodeValues(target, r.FormValues())
 }
 
 // FormValues returns all form values.
@@ -176,10 +169,30 @@ func (r *Request) parseForm() error {
 
 // ReadQuery unmarshal query to the structure.
 func (r *Request) ReadQuery(target interface{}) error {
+	return r.decodeValues(target, r.Query())
+}
+
+// ParamValues returns all param values in url.Values format.
+func (r *Request) ParamValues() url.Values {
+	values := make(url.Values)
+
+	for _, param := range r.Route.Params {
+		values.Add(param.Key, param.Value)
+	}
+
+	return values
+}
+
+// ReadParams unmarshal url params to the structure.
+func (r *Request) ReadParams(target interface{}) error {
+	return r.decodeValues(target, r.ParamValues())
+}
+
+// Decode url.Values.
+func (r *Request) decodeValues(target interface{}, values url.Values) error {
 	decoder := schema.NewDecoder()
 
-	// Decode form values.
-	if err := decoder.Decode(target, r.Query()); err != nil {
+	if err := decoder.Decode(target, values); err != nil {
 		return err
 	}
 
