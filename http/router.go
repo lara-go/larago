@@ -186,16 +186,29 @@ func (r *Router) panicHandler(w net_http.ResponseWriter, request *Request) {
 func (r *Router) dispatchRequest(request *Request) responses.Response {
 	action := r.Container.Wrap(request.Route.Handler)
 
+	// Prepare params to pass to the action.
 	params := make([]interface{}, 0)
+
+	// Validate request.
+	for _, validator := range request.Route.ToValidate {
+		if err := ValidateRequest(request, validator); err != nil {
+			return r.formatError(request, err)
+		}
+
+		params = append(params, validator)
+	}
+
 	for _, param := range request.Route.Params {
 		params = append(params, param.Value)
 	}
 
+	// Dispatch route action.
 	result, err := action(params...)
 	if err != nil {
 		return r.formatError(request, err)
 	}
 
+	// Return appopriate response.
 	if response, ok := result.(responses.Response); ok {
 		return response
 	}

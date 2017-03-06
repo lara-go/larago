@@ -10,3 +10,28 @@ type ErrorsHandlerContract interface {
 	// Render error to return to the client.
 	Render(request *Request, err error) responses.Response
 }
+
+// SelfValidator interface for json requests.
+type SelfValidator interface {
+	Validate() error
+}
+
+// JSONRequestValidator interface for json requests.
+type JSONRequestValidator interface {
+	ValidateJSON() error
+}
+
+// FormRequestValidator interface for form requests.
+type FormRequestValidator interface {
+	ValidateForm() error
+}
+
+// QueryRequestValidator interface for query.
+type QueryRequestValidator interface {
+	ValidateQuery() error
+}
+
+// ParamsRequestValidator interface for url params.
+type ParamsRequestValidator interface {
+	ValidateParams() error
+}

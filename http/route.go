@@ -10,6 +10,7 @@ type Route struct {
 	Middlewares []Middleware
 	Handler     interface{}
 	Params      httprouter.Params
+	ToValidate  []SelfValidator
 }
 
 // NewRoute constructor.
@@ -37,6 +38,13 @@ func (r *Route) Middleware(middleware ...Middleware) *Route {
 // Action to use.
 func (r *Route) Action(handler interface{}) *Route {
 	r.Handler = handler
+
+	return r
+}
+
+// Validate request.
+func (r *Route) Validate(requests ...SelfValidator) *Route {
+	r.ToValidate = requests
 
 	return r
 }
