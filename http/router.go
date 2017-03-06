@@ -139,7 +139,7 @@ func (r *Router) wrapHandlers(route *Route) httprouter.Handle {
 
 	// Return httprouter handler.
 	return func(w net_http.ResponseWriter, req *net_http.Request, ps httprouter.Params) {
-		request := r.makeRequest(req)
+		request := NewRequest(req)
 		request.Route = route
 		request.Route.Params = ps
 
@@ -164,13 +164,6 @@ func (r *Router) wrapHandlers(route *Route) httprouter.Handle {
 		default:
 			r.sendResponse(w, request, response)
 		}
-	}
-}
-
-// Make internal Request instance from basic one.
-func (r *Router) makeRequest(req *net_http.Request) *Request {
-	return &Request{
-		Request: req,
 	}
 }
 
@@ -242,7 +235,7 @@ func (r *Router) sendRedirect(w net_http.ResponseWriter, request *Request, redir
 		redirect.To(r.Path)
 	}
 
-	net_http.Redirect(w, request.Request, redirect.GetLocation(), redirect.Status())
+	net_http.Redirect(w, request.BaseRequest(), redirect.GetLocation(), redirect.Status())
 }
 
 // Send common Response to client.
@@ -277,14 +270,14 @@ func (r *Router) SetMethodNotAllowedHandler(handler net_http.HandlerFunc) *Route
 
 // Custom handler for NotFound errors.
 func (r *Router) handleNotFound(w net_http.ResponseWriter, req *net_http.Request) {
-	request := r.makeRequest(req)
+	request := NewRequest(req)
 
 	r.sendResponse(w, request, r.ErrorsHandler.Render(request, errors.NotFoundHTTPError()))
 }
 
 // Custom handler for MethodNotAllowed errors.
 func (r *Router) handleMethodNotAllowed(w net_http.ResponseWriter, req *net_http.Request) {
-	request := r.makeRequest(req)
+	request := NewRequest(req)
 
 	r.sendResponse(w, request, r.ErrorsHandler.Render(request, errors.MethodNotAllowedHTTPError()))
 }

@@ -1,5 +1,7 @@
 package responses
 
+import "fmt"
+
 // HTML response.
 type HTML struct {
 	AbstractResponse
@@ -8,9 +10,9 @@ type HTML struct {
 }
 
 // NewHTML send plain text response.
-func NewHTML(status int, html string) *HTML {
+func NewHTML(status int, html string, a ...interface{}) *HTML {
 	response := &HTML{
-		html: html,
+		html: fmt.Sprintf(html, a...),
 	}
 	response.SetStatus(status)
 

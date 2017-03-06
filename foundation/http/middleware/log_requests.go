@@ -16,8 +16,8 @@ type LogRequests struct {
 
 // Handle request.
 func (m *LogRequests) Handle(request *http.Request, next http.Handler) responses.Response {
-	path := request.RequestURI
-	method := request.Method
+	path := request.URL()
+	method := request.Method()
 	startTime := time.Now()
 
 	// Retrieve response.
@@ -30,7 +30,7 @@ func (m *LogRequests) Handle(request *http.Request, next http.Handler) responses
 
 			response.Status(),         // HTTP status code.
 			time.Now().Sub(startTime), // Latency
-			request.RemoteAddr,        // Remote IP
+			request.IP(),              // Remote IP
 			method,                    // HTTP method
 			path,                      // Request URI
 		)
