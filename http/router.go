@@ -16,10 +16,11 @@ import (
 // Router struct.
 type Router struct {
 	// Dependencies
-	Container     *container.Container
-	Logger        *logger.Logger
-	ErrorsHandler ErrorsHandlerContract
-	Config        larago.Config
+	Container         *container.Container
+	Logger            *logger.Logger
+	RequestsValidator *RequestsValidator
+	ErrorsHandler     ErrorsHandlerContract
+	Config            larago.Config
 
 	// Basic httprouter.
 	router *httprouter.Router
@@ -191,7 +192,7 @@ func (r *Router) dispatchRequest(request *Request) responses.Response {
 
 	// Validate request.
 	for _, validator := range request.Route.ToValidate {
-		if err := ValidateRequest(request, validator); err != nil {
+		if err := r.RequestsValidator.ValidateRequest(request, validator); err != nil {
 			return r.formatError(request, err)
 		}
 

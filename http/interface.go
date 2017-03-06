@@ -1,6 +1,9 @@
 package http
 
-import "github.com/lara-go/larago/http/responses"
+import (
+	"github.com/lara-go/larago/http/errors"
+	"github.com/lara-go/larago/http/responses"
+)
 
 // ErrorsHandlerContract for every handler to resolve errors during http calls..
 type ErrorsHandlerContract interface {
@@ -9,6 +12,12 @@ type ErrorsHandlerContract interface {
 
 	// Render error to return to the client.
 	Render(request *Request, err error) responses.Response
+}
+
+// ValidationErrorsConverter interface for requests validators.
+type ValidationErrorsConverter interface {
+	// ConvertValidationErrors to field - message format.
+	ConvertValidationErrors(err error, tagName string, validator interface{}) *errors.ValidationErrors
 }
 
 // SelfValidator interface for json requests.
