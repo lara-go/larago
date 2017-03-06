@@ -57,6 +57,11 @@ func (r *Request) URL() string {
 	return r.request.RequestURI
 }
 
+// Referer returns referer from header.
+func (r *Request) Referer() string {
+	return r.Header("Referer")
+}
+
 // IP tries to return real client IP.
 func (r *Request) IP() string {
 	// Try to get IP from X-Real-IP header.
@@ -115,6 +120,11 @@ func (r *Request) Param(name string) string {
 	return r.Route.Params.ByName(name)
 }
 
+// Query returns query params.
+func (r *Request) Query() url.Values {
+	return r.request.URL.Query()
+}
+
 // ReadForm unmarshal form request to the structure.
 func (r *Request) ReadForm(target interface{}) error {
 	decoder := schema.NewDecoder()
@@ -142,6 +152,18 @@ func (r *Request) parseForm() error {
 		if err := r.request.ParseForm(); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// ReadQuery unmarshal query to the structure.
+func (r *Request) ReadQuery(target interface{}) error {
+	decoder := schema.NewDecoder()
+
+	// Decode form values.
+	if err := decoder.Decode(target, r.Query()); err != nil {
+		return err
 	}
 
 	return nil
