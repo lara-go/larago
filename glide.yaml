@@ -1,4 +1,10 @@
 package: github.com/lara-go/larago
+homepage: https://github.com/lara-go/larago
+license: MIT
+owners:
+- name: Maxim Lanin
+  email: max@lanin.me
+  homepage: https://blog.lanin.me
 import:
 - package: github.com/asaskevich/EventBus
 - package: github.com/gavv/httpexpect
@@ -8,6 +14,7 @@ import:
   version: ~1.0.0
   subpackages:
   - dialects/sqlite
+  - dialects/mysql
 - package: github.com/joho/godotenv
   version: ~1.1.0
 - package: github.com/julienschmidt/httprouter
