@@ -19,7 +19,7 @@ func NewText(status int, text string, a ...interface{}) *Text {
 	return response
 }
 
-// ContentType returns ContentType header.
+// ContentType returns Content-Type header.
 func (r *Text) ContentType() string {
 	return "text/plain"
 }

@@ -1,11 +1,14 @@
 package responses
 
+import net_http "net/http"
+
 // AbstractResponse handles response.
 type AbstractResponse struct {
 	Response
 
 	status  int
 	headers map[string]string
+	cookies []*net_http.Cookie
 }
 
 // Status returns HTTP status.
@@ -20,7 +23,7 @@ func (r *AbstractResponse) SetStatus(status int) Response {
 	return r
 }
 
-// WithHeader sets header to send.
+// WithHeader attaches header to response.
 func (r *AbstractResponse) WithHeader(name, value string) Response {
 	if r.headers == nil {
 		r.headers = make(map[string]string)
@@ -34,4 +37,16 @@ func (r *AbstractResponse) WithHeader(name, value string) Response {
 // Headers get headers to send.
 func (r *AbstractResponse) Headers() map[string]string {
 	return r.headers
+}
+
+// WithCookies attaches cookies to response.
+func (r *AbstractResponse) WithCookies(cookie ...*net_http.Cookie) Response {
+	r.cookies = cookie
+
+	return r
+}
+
+// Cookies returns set of cookies to send.
+func (r *AbstractResponse) Cookies() []*net_http.Cookie {
+	return r.cookies
 }

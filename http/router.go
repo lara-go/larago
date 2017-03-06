@@ -230,22 +230,35 @@ func (r *Router) formatError(request *Request, err error) responses.Response {
 
 // Send redirect response via native http.Redirect.
 func (r *Router) sendRedirect(w net_http.ResponseWriter, request *Request, redirect *responses.Redirect) {
+	// Find alias if there is one.
 	alias := redirect.GetRoute()
 	if r, ok := r.aliases[alias]; ok {
 		redirect.To(r.Path)
 	}
 
+	// Send redirect.
 	net_http.Redirect(w, request.BaseRequest(), redirect.GetLocation(), redirect.Status())
 }
 
 // Send common Response to client.
 func (r *Router) sendResponse(w net_http.ResponseWriter, request *Request, response responses.Response) {
+	// Send content type.
 	w.Header().Set("content-type", response.ContentType()+"; charset=utf-8")
+
+	// Send additional headers.
 	for name, value := range response.Headers() {
 		w.Header().Set(name, value)
 	}
 
+	// Send cookies.
+	for _, cookie := range response.Cookies() {
+		net_http.SetCookie(w, cookie)
+	}
+
+	// Send status.
 	w.WriteHeader(response.Status())
+
+	// Send body.
 	w.Write(response.Body())
 }
 

@@ -19,7 +19,7 @@ func NewHTML(status int, html string, a ...interface{}) *HTML {
 	return response
 }
 
-// ContentType returns ContentType header.
+// ContentType returns Content-Type header.
 func (r *HTML) ContentType() string {
 	return "text/html"
 }

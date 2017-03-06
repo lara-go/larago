@@ -22,7 +22,7 @@ func NewJSON(status int, data interface{}) *JSON {
 	return response
 }
 
-// ContentType returns ContentType header.
+// ContentType returns Content-Type header.
 func (r *JSON) ContentType() string {
 	return "application/json"
 }
