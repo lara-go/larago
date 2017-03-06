@@ -115,6 +115,23 @@ func (r *Request) WantsPlainText() bool {
 	return r.HeaderContains("accept", "text/plain")
 }
 
+// Cookie returns cookie value.
+func (r *Request) Cookie(name string) string {
+	cookie, err := r.request.Cookie(name)
+	if err != nil {
+		return cookie.String()
+	}
+
+	return ""
+}
+
+// HasCookie checks if cookie was sent.
+func (r *Request) HasCookie(name string) bool {
+	_, err := r.request.Cookie(name)
+
+	return err == nil
+}
+
 // Param returns route param.
 func (r *Request) Param(name string) string {
 	return r.Route.Params.ByName(name)
