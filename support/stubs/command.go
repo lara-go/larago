@@ -10,7 +10,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// {{.Name}} .
+// {{.Name}} console command.
 type {{.Name}} struct {
 	Logger *logger.Logger
 }
