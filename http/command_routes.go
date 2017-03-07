@@ -30,8 +30,9 @@ func (c *CommandRoutes) GetCommand() cli.Command {
 // Handle command.
 func (c *CommandRoutes) Handle(args cli.Args) error {
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Method", "Path", "Name", "Middleware"})
+	table.SetHeader([]string{"Method", "URI", "Name", "Middleware"})
 	table.SetColWidth(200) // Set max col width to 200. There may be lots of middleware or long path.
+	table.SetAutoFormatHeaders(false)
 
 	routes := c.Router.GetRoutes()
 	routesLen := len(routes)
