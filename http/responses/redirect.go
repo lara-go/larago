@@ -1,6 +1,7 @@
 package responses
 
 import (
+	net_http "net/http"
 	"net/url"
 	"strings"
 )
@@ -24,6 +25,27 @@ func NewRedirect(status int) *Redirect {
 	response.SetStatus(status)
 
 	return response
+}
+
+// WithStatus sets HTTP status.
+func (r *Redirect) WithStatus(status int) Response {
+	r.SetStatus(status)
+
+	return r
+}
+
+// WithHeader attaches header to response.
+func (r *Redirect) WithHeader(name, value string) Response {
+	r.SetHeader(name, value)
+
+	return r
+}
+
+// WithCookies attaches cookies to response.
+func (r *Redirect) WithCookies(cookie ...*net_http.Cookie) Response {
+	r.SetCookies(cookie)
+
+	return r
 }
 
 // To sets real url to redirect.

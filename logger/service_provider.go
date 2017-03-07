@@ -14,9 +14,9 @@ type ServiceProvider struct{}
 func (p *ServiceProvider) Register(application *larago.Application) {
 	application.Bind(func() (*Logger, error) {
 		return &Logger{
-			dateTimeFormat: application.DateTimeFormat,
-			debugMode:      !application.Env("production") || application.Config().Debug(),
-			logger:         log.New(os.Stdout, "", 0),
+			DateTimeFormat: application.DateTimeFormat,
+			DebugMode:      !application.Env("production") || application.Config().Debug(),
+			Logger:         log.New(os.Stdout, "", 0),
 		}, nil
 	})
 }

@@ -33,12 +33,15 @@ type Router struct {
 
 	// Map of alias:*Route.
 	aliases map[string]*Route
+
+	groupsStack []*GroupRoute
 }
 
 // NewRouter constructor.
 func NewRouter() *Router {
 	router := &Router{
-		aliases: make(map[string]*Route),
+		aliases:     make(map[string]*Route),
+		groupsStack: make([]*GroupRoute, 0),
 	}
 
 	router.router = httprouter.New()
@@ -73,9 +76,36 @@ func (r *Router) DELETE(path string) *Route {
 	return r.addRoute(net_http.MethodDelete, path)
 }
 
+// Group routes.
+func (r *Router) Group(path string, callback func(), middleware ...Middleware) {
+	group := NewGroupRoute(path).Middleware(middleware...)
+
+	// Add group to the begining of the stack.
+	r.groupsStack = append([]*GroupRoute{group}, r.groupsStack...)
+
+	// Call group callback.
+	callback()
+
+	// Remove group from the stack.
+	r.groupsStack = r.groupsStack[:r.groupsStackLen()-1]
+}
+
+func (r *Router) inGroup() bool {
+	return r.groupsStackLen() != 0
+}
+
+func (r *Router) groupsStackLen() int {
+	return len(r.groupsStack)
+}
+
 // Add route helper.
 func (r *Router) addRoute(method, path string) *Route {
 	route := NewRoute(method, path)
+
+	for _, group := range r.groupsStack {
+		route.extendWithGroup(group)
+	}
+
 	r.routes = append(r.routes, route)
 
 	return route
@@ -219,7 +249,7 @@ func (r *Router) formatResponse(request *Request, result interface{}) responses.
 	case int:
 		return responses.NewText(200, fmt.Sprintf("%d", v))
 	case float64:
-		return responses.NewText(200, fmt.Sprintf("%f", v))
+		return responses.NewText(200, fmt.Sprintf("%e", v))
 	case bool:
 		return responses.NewText(200, fmt.Sprintf("%t", v))
 	case error:
@@ -249,10 +279,10 @@ func (r *Router) send(response responses.Response, request *Request, w net_http.
 
 // Send redirect response via native http.Redirect.
 func (r *Router) sendRedirect(redirect *responses.Redirect, request *Request, w net_http.ResponseWriter) {
-	// Find alias if there is one.
+	// Find alias if there is one and set its real path as a redirect location.
 	alias := redirect.GetRoute()
-	if r, ok := r.aliases[alias]; ok {
-		redirect.To(r.Path)
+	if route, ok := r.aliases[alias]; ok {
+		redirect.To(route.Path)
 	}
 
 	// Send redirect.
@@ -284,6 +314,16 @@ func (r *Router) sendResponse(response responses.Response, request *Request, w n
 // GetHTTPRouter returns httprouter instance.
 func (r *Router) GetHTTPRouter() *httprouter.Router {
 	return r.router
+}
+
+// GetRoutes returns all registered routes.
+func (r *Router) GetRoutes() []*Route {
+	return r.routes
+}
+
+// GetMiddleware returns all glbally registered middleware.
+func (r *Router) GetMiddleware() []Middleware {
+	return r.middleware
 }
 
 // SetNotFoundHandler allowes to set custom NotFound handler.

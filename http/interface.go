@@ -5,6 +5,15 @@ import (
 	"github.com/lara-go/larago/http/responses"
 )
 
+// Middleware interface.
+type Middleware interface {
+	// Handle request.
+	Handle(request *Request, next Handler) responses.Response
+}
+
+// Handler function.
+type Handler func(request *Request) responses.Response
+
 // ErrorsHandlerContract for every handler to resolve errors during http calls..
 type ErrorsHandlerContract interface {
 	// Report error to logger.

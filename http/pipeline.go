@@ -5,14 +5,6 @@ import (
 	"github.com/lara-go/larago/http/responses"
 )
 
-// Middleware interface.
-type Middleware interface {
-	Handle(request *Request, next Handler) responses.Response
-}
-
-// Handler function.
-type Handler func(request *Request) responses.Response
-
 // Pipeline struct.
 type Pipeline struct {
 	container  container.Interface
