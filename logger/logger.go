@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"runtime/debug"
 	"time"
@@ -50,6 +51,13 @@ func (l Logger) WithContext(context interface{}) *Logger {
 	l.context = context
 
 	return &l
+}
+
+// SetOutput changes default output.
+func (l *Logger) SetOutput(w io.Writer) *Logger {
+	l.logger.SetOutput(w)
+
+	return l
 }
 
 // Error text.
