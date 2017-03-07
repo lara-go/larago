@@ -153,18 +153,12 @@ func (r *Router) wrapHandlers(route *Route) httprouter.Handle {
 		// Run request through all middleware chaining one by one.
 		// then dispatch action handler itself, obtain response
 		// and lift it back.
-		result := NewPipeline(r.Container).
+		response := NewPipeline(r.Container).
 			Send(request).
 			Through(middleware).
 			Then(r.dispatchRequest)
 
-		// Send response.
-		switch response := result.(type) {
-		case *responses.Redirect:
-			r.sendRedirect(w, request, response)
-		default:
-			r.sendResponse(w, request, response)
-		}
+		r.send(response, request, w)
 	}
 }
 
@@ -178,7 +172,7 @@ func (r *Router) panicHandler(w net_http.ResponseWriter, request *Request) {
 			err = fmt.Errorf("%s", re)
 		}
 
-		r.sendResponse(w, request, r.formatError(request, err))
+		r.send(r.formatErrorResponse(request, err), request, w)
 	}
 }
 
@@ -193,7 +187,7 @@ func (r *Router) dispatchRequest(request *Request) responses.Response {
 	// Validate request.
 	for _, validator := range request.Route.ToValidate {
 		if err := r.RequestsValidator.ValidateRequest(request, validator); err != nil {
-			return r.formatError(request, err)
+			return r.formatErrorResponse(request, err)
 		}
 
 		params = append(params, validator)
@@ -206,7 +200,7 @@ func (r *Router) dispatchRequest(request *Request) responses.Response {
 	// Dispatch route action.
 	result, err := action(params...)
 	if err != nil {
-		return r.formatError(request, err)
+		return r.formatErrorResponse(request, err)
 	}
 
 	// Return appopriate response.
@@ -229,21 +223,32 @@ func (r *Router) formatResponse(request *Request, result interface{}) responses.
 	case bool:
 		return responses.NewText(200, fmt.Sprintf("%t", v))
 	case error:
-		return r.formatError(request, v)
+		return r.formatErrorResponse(request, v)
 	default:
 		return responses.NewJSON(200, v)
 	}
 }
 
 // Format error.
-func (r *Router) formatError(request *Request, err error) responses.Response {
+func (r *Router) formatErrorResponse(request *Request, err error) responses.Response {
 	r.ErrorsHandler.Report(err)
 
 	return r.ErrorsHandler.Render(request, err)
 }
 
+// Send abstract response to the client.
+func (r *Router) send(response responses.Response, request *Request, w net_http.ResponseWriter) {
+	// Send response.
+	switch resp := response.(type) {
+	case *responses.Redirect:
+		r.sendRedirect(resp, request, w)
+	default:
+		r.sendResponse(resp, request, w)
+	}
+}
+
 // Send redirect response via native http.Redirect.
-func (r *Router) sendRedirect(w net_http.ResponseWriter, request *Request, redirect *responses.Redirect) {
+func (r *Router) sendRedirect(redirect *responses.Redirect, request *Request, w net_http.ResponseWriter) {
 	// Find alias if there is one.
 	alias := redirect.GetRoute()
 	if r, ok := r.aliases[alias]; ok {
@@ -254,8 +259,8 @@ func (r *Router) sendRedirect(w net_http.ResponseWriter, request *Request, redir
 	net_http.Redirect(w, request.BaseRequest(), redirect.GetLocation(), redirect.Status())
 }
 
-// Send common Response to client.
-func (r *Router) sendResponse(w net_http.ResponseWriter, request *Request, response responses.Response) {
+// Send common response.
+func (r *Router) sendResponse(response responses.Response, request *Request, w net_http.ResponseWriter) {
 	// Send content type.
 	w.Header().Set("content-type", response.ContentType()+"; charset=utf-8")
 
@@ -299,12 +304,12 @@ func (r *Router) SetMethodNotAllowedHandler(handler net_http.HandlerFunc) *Route
 func (r *Router) handleNotFound(w net_http.ResponseWriter, req *net_http.Request) {
 	request := NewRequest(req)
 
-	r.sendResponse(w, request, r.ErrorsHandler.Render(request, errors.NotFoundHTTPError()))
+	r.sendResponse(r.ErrorsHandler.Render(request, errors.NotFoundHTTPError()), request, w)
 }
 
 // Custom handler for MethodNotAllowed errors.
 func (r *Router) handleMethodNotAllowed(w net_http.ResponseWriter, req *net_http.Request) {
 	request := NewRequest(req)
 
-	r.sendResponse(w, request, r.ErrorsHandler.Render(request, errors.MethodNotAllowedHTTPError()))
+	r.sendResponse(r.ErrorsHandler.Render(request, errors.MethodNotAllowedHTTPError()), request, w)
 }
