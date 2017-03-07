@@ -1,6 +1,9 @@
 package responses
 
-import "fmt"
+import (
+	"fmt"
+	net_http "net/http"
+)
 
 // Text response.
 type Text struct {
@@ -17,6 +20,27 @@ func NewText(status int, text string, a ...interface{}) *Text {
 	response.SetStatus(status)
 
 	return response
+}
+
+// WithStatus sets HTTP status.
+func (r *Text) WithStatus(status int) Response {
+	r.SetStatus(status)
+
+	return r
+}
+
+// WithHeader attaches header to response.
+func (r *Text) WithHeader(name, value string) Response {
+	r.SetHeader(name, value)
+
+	return r
+}
+
+// WithCookies attaches cookies to response.
+func (r *Text) WithCookies(cookie ...*net_http.Cookie) Response {
+	r.SetCookies(cookie)
+
+	return r
 }
 
 // ContentType returns Content-Type header.
