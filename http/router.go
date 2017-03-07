@@ -249,7 +249,7 @@ func (r *Router) formatResponse(request *Request, result interface{}) responses.
 	case int:
 		return responses.NewText(200, fmt.Sprintf("%d", v))
 	case float64:
-		return responses.NewText(200, fmt.Sprintf("%f", v))
+		return responses.NewText(200, fmt.Sprintf("%e", v))
 	case bool:
 		return responses.NewText(200, fmt.Sprintf("%t", v))
 	case error:

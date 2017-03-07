@@ -30,7 +30,7 @@ func (r *Route) As(name string) *Route {
 
 // Middleware sets middleware for route.
 func (r *Route) Middleware(middleware ...Middleware) *Route {
-	r.Middlewares = middleware
+	r.Middlewares = append(r.Middlewares, middleware...)
 
 	return r
 }
@@ -51,8 +51,10 @@ func (r *Route) Validate(requests ...SelfValidator) *Route {
 
 // Extend current route with data from group.
 func (r *Route) extendWithGroup(group *GroupRoute) {
-	// Merge group middleware with route ones.
-	r.Middlewares = append(group.Middlewares, r.Middlewares...)
+	if len(group.Middlewares) > 0 {
+		// Merge group middleware with route ones.
+		r.Middlewares = append(group.Middlewares, r.Middlewares...)
+	}
 
 	// Merge path only if route path not equal to /
 	if r.Path != "/" {
