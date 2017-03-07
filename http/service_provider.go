@@ -14,6 +14,7 @@ func (p *ServiceProvider) Register(application *larago.Application) {
 		&CommandDown{},
 		&CommandUp{},
 		&CommandServe{},
+		&CommandRoutes{},
 	)
 
 	// Register server itself.
