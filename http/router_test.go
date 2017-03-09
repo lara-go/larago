@@ -102,7 +102,7 @@ func TestCommonRequestRouter(t *testing.T) {
 		JSON().Object().ValueEqual("foo", "bar")
 }
 
-func TestRedrect(t *testing.T) {
+func TestRedirect(t *testing.T) {
 	router := factory()
 
 	// Redirect.
