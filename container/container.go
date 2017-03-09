@@ -246,7 +246,7 @@ func (c *Container) Call(function interface{}, args ...interface{}) (interface{}
 
 // Resolve function arguments.
 func (c *Container) resolveFunctionArgs(function reflect.Value, args []interface{}) []reflect.Value {
-	var i, j int
+	var f, i, j int
 
 	t := function.Type()
 	insLen := t.NumIn()
@@ -257,14 +257,16 @@ func (c *Container) resolveFunctionArgs(function reflect.Value, args []interface
 		argsLen := len(args)
 		for i = 0; i < argsLen && i < insLen; i++ {
 			v := reflect.ValueOf(args[i])
-			if v.Type().Kind() != t.In(i).Kind() {
-				break
+
+			// If argument's type equals to ins type, use it. Otherwise skip.
+			if normalizeAbstract(v.Type()) == normalizeAbstract(t.In(i)) {
+				ins[i] = v
+				f++
 			}
-			ins[i] = v
 		}
 
 		// Then try to resolve left ones as dependencies.
-		for j = i; j < insLen; j++ {
+		for j = f; j < insLen; j++ {
 			ins[j] = *c.resolveService(t.In(j))
 		}
 	}
