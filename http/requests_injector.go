@@ -7,13 +7,27 @@ const (
 	schemaTag = "schema"
 )
 
-// RequestsValidator populates and validates
-type RequestsValidator struct {
+// RequestsInjector populates and validates
+type RequestsInjector struct {
 	ErrorsConverter ValidationErrorsConverter
 }
 
-// ValidateRequest validates form request.
-func (rv *RequestsValidator) ValidateRequest(request *Request, validator SelfValidator) *errors.HTTPError {
+// Inject custom params to for the action.
+func (rv *RequestsInjector) Inject(params []interface{}, request *Request) ([]interface{}, error) {
+	// Validate request.
+	for _, validator := range request.Route.ToValidate {
+		if err := rv.validateRequest(request, validator); err != nil {
+			return nil, err
+		}
+
+		params = append(params, validator)
+	}
+
+	return params, nil
+}
+
+// Validates form request.
+func (rv *RequestsInjector) validateRequest(request *Request, validator SelfValidator) *errors.HTTPError {
 	var tagName string
 	var err error
 

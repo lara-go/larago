@@ -31,9 +31,6 @@ func factory() *http.Router {
 	router.ErrorsHandler = &http.ErrorsHandler{
 		Logger: logger,
 	}
-	router.RequestsValidator = &http.RequestsValidator{
-		ErrorsConverter: &errors.OzzoValidationErrorsConverter{},
-	}
 
 	return router
 }
@@ -204,6 +201,9 @@ type Form struct {
 
 func TestFormRequests(t *testing.T) {
 	router := factory()
+	router.SetArgsInjectors(&http.RequestsInjector{
+		ErrorsConverter: &errors.OzzoValidationErrorsConverter{},
+	})
 
 	// BarBaz accepts param, requesting it from unmarshalling to struct.
 	router.GET("/bar/:text").Action(func(request *http.Request) responses.Response {

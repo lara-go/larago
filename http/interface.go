@@ -23,6 +23,12 @@ type ErrorsHandlerContract interface {
 	Render(request *Request, err error) responses.Response
 }
 
+// ArgsInjector uses as an external source of arguments that can be injected in the route action handler.
+type ArgsInjector interface {
+	// Injects custom params to for the action.
+	Inject(params []interface{}, request *Request) ([]interface{}, error)
+}
+
 // ValidationErrorsConverter interface for requests validators.
 type ValidationErrorsConverter interface {
 	// ConvertValidationErrors to field - message format.

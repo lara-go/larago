@@ -18,7 +18,7 @@ type Router struct {
 	// Dependencies
 	Container         *container.Container
 	Logger            *logger.Logger
-	RequestsValidator *RequestsValidator
+	RequestsValidator *RequestsInjector
 	ErrorsHandler     ErrorsHandlerContract
 	Config            larago.Config
 
@@ -34,7 +34,11 @@ type Router struct {
 	// Map of alias:*Route.
 	aliases map[string]*Route
 
+	// Stack of group routes.
 	groupsStack []*GroupRoute
+
+	// Action handler's arguments injectors.
+	argsInjectors []ArgsInjector
 }
 
 // NewRouter constructor.
@@ -42,6 +46,9 @@ func NewRouter() *Router {
 	router := &Router{
 		aliases:     make(map[string]*Route),
 		groupsStack: make([]*GroupRoute, 0),
+		argsInjectors: []ArgsInjector{
+			&RouteParamsInjector{},
+		},
 	}
 
 	router.router = httprouter.New()
@@ -213,18 +220,13 @@ func (r *Router) dispatchRequest(request *Request) responses.Response {
 
 	// Prepare params to pass to the action.
 	params := make([]interface{}, 0)
+	for _, injector := range r.argsInjectors {
+		var err error
+		params, err = injector.Inject(params, request)
 
-	// Validate request.
-	for _, validator := range request.Route.ToValidate {
-		if err := r.RequestsValidator.ValidateRequest(request, validator); err != nil {
+		if err != nil {
 			return r.formatErrorResponse(request, err)
 		}
-
-		params = append(params, validator)
-	}
-
-	for _, param := range request.Route.Params {
-		params = append(params, param.Value)
 	}
 
 	// Dispatch route action.
@@ -324,6 +326,11 @@ func (r *Router) GetRoutes() []*Route {
 // GetMiddleware returns all glbally registered middleware.
 func (r *Router) GetMiddleware() []Middleware {
 	return r.middleware
+}
+
+// SetArgsInjectors sets additional components that can inject more custom arguments to route action handler.
+func (r *Router) SetArgsInjectors(injectors ...ArgsInjector) {
+	r.argsInjectors = append(r.argsInjectors, injectors...)
 }
 
 // SetNotFoundHandler allowes to set custom NotFound handler.

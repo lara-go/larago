@@ -32,6 +32,6 @@ func (p *ServiceProvider) registerErrorsHandler(application *larago.Application)
 }
 
 func (p *ServiceProvider) registerRequestsValidator(application *larago.Application) {
-	application.Bind(&RequestsValidator{})
+	application.Bind(&RequestsInjector{})
 	application.Bind(&errors.OzzoValidationErrorsConverter{}, (*ValidationErrorsConverter)(nil))
 }
