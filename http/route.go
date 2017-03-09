@@ -1,6 +1,9 @@
 package http
 
-import "github.com/julienschmidt/httprouter"
+import (
+	"github.com/julienschmidt/httprouter"
+	"github.com/lara-go/larago/validation"
+)
 
 // Route struct.
 type Route struct {
@@ -10,7 +13,7 @@ type Route struct {
 	Middlewares []Middleware
 	Handler     interface{}
 	Params      httprouter.Params
-	ToValidate  []SelfValidator
+	ToValidate  []validation.SelfValidator
 }
 
 // NewRoute constructor.
@@ -43,7 +46,7 @@ func (r *Route) Action(handler interface{}) *Route {
 }
 
 // Validate request.
-func (r *Route) Validate(requests ...SelfValidator) *Route {
+func (r *Route) Validate(requests ...validation.SelfValidator) *Route {
 	r.ToValidate = requests
 
 	return r

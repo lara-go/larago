@@ -7,7 +7,7 @@ import (
 	net_http "net/http"
 	"testing"
 
-	validation "github.com/go-ozzo/ozzo-validation"
+	ozzo "github.com/go-ozzo/ozzo-validation"
 	"github.com/lara-go/larago"
 	"github.com/lara-go/larago/container"
 	"github.com/lara-go/larago/http"
@@ -15,6 +15,7 @@ import (
 	"github.com/lara-go/larago/http/responses"
 	"github.com/lara-go/larago/logger"
 	"github.com/lara-go/larago/support/testsuite"
+	"github.com/lara-go/larago/validation"
 )
 
 func factory() *http.Router {
@@ -23,6 +24,7 @@ func factory() *http.Router {
 		DateTimeFormat: larago.DateTimeFormat,
 		DebugMode:      true,
 		Logger:         log.New(ioutil.Discard, "", 0),
+		// Logger: log.New(os.Stdout, "", 0),
 	}
 
 	router := http.NewRouter()
@@ -30,6 +32,7 @@ func factory() *http.Router {
 	router.Container = container
 	router.ErrorsHandler = &http.ErrorsHandler{
 		Logger: logger,
+		ValidationErrorsConverter: &validation.OzzoErrorsConverter{},
 	}
 
 	return router
@@ -158,8 +161,8 @@ func (r *PostNewsJSON) ValidateJSON() error {
 
 // Validate me.
 func (r *PostNewsJSON) Validate() error {
-	return validation.ValidateStruct(r,
-		validation.Field(&r.Text, validation.Required),
+	return ozzo.ValidateStruct(r,
+		ozzo.Field(&r.Text, ozzo.Required),
 	)
 }
 
@@ -174,8 +177,8 @@ func (r *PostNewsForm) ValidateForm() error {
 
 // Validate me.
 func (r *PostNewsForm) Validate() error {
-	return validation.ValidateStruct(r,
-		validation.Field(&r.Text, validation.Required),
+	return ozzo.ValidateStruct(r,
+		ozzo.Field(&r.Text, ozzo.Required),
 	)
 }
 
@@ -190,8 +193,8 @@ func (r *PostNewsQuery) ValidateQuery() error {
 
 // Validate me.
 func (r *PostNewsQuery) Validate() error {
-	return validation.ValidateStruct(r,
-		validation.Field(&r.Text, validation.Required),
+	return ozzo.ValidateStruct(r,
+		ozzo.Field(&r.Text, ozzo.Required),
 	)
 }
 
@@ -201,9 +204,7 @@ type Form struct {
 
 func TestFormRequests(t *testing.T) {
 	router := factory()
-	router.SetArgsInjectors(&http.RequestsInjector{
-		ErrorsConverter: &errors.OzzoValidationErrorsConverter{},
-	})
+	router.SetArgsInjectors(&http.RequestsInjector{})
 
 	// BarBaz accepts param, requesting it from unmarshalling to struct.
 	router.GET("/bar/:text").Action(func(request *http.Request) responses.Response {
