@@ -1,9 +1,6 @@
 package http
 
-import (
-	"github.com/lara-go/larago"
-	"github.com/lara-go/larago/http/errors"
-)
+import "github.com/lara-go/larago"
 
 // ServiceProvider struct.
 type ServiceProvider struct{}
@@ -32,6 +29,5 @@ func (p *ServiceProvider) registerErrorsHandler(application *larago.Application)
 }
 
 func (p *ServiceProvider) registerRequestsValidator(application *larago.Application) {
-	application.Bind(&RequestsValidator{})
-	application.Bind(&errors.OzzoValidationErrorsConverter{}, (*ValidationErrorsConverter)(nil))
+	application.Bind(&RequestsInjector{})
 }

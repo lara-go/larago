@@ -4,12 +4,14 @@ import (
 	"github.com/lara-go/larago/http/errors"
 	"github.com/lara-go/larago/http/responses"
 	"github.com/lara-go/larago/logger"
+	"github.com/lara-go/larago/validation"
 )
 
 // ErrorsHandler to handle errors during http calls.
 type ErrorsHandler struct {
-	Logger *logger.Logger
-	Debug  bool `di:"Config.App.Debug"`
+	Logger                    *logger.Logger
+	Debug                     bool `di:"Config.App.Debug"`
+	ValidationErrorsConverter validation.ErrorsConverter
 }
 
 // Report error to logger.
@@ -50,12 +52,29 @@ func (h *ErrorsHandler) Render(request *Request, err error) responses.Response {
 
 // Make HTTPError instance from custom error.
 func (h *ErrorsHandler) makeHTTPError(err error) *errors.HTTPError {
-	var ok bool
-	var httpErr *errors.HTTPError
-
-	if httpErr, ok = err.(*errors.HTTPError); !ok {
-		httpErr = errors.UnknownError(err)
+	if httpErr, ok := err.(*errors.HTTPError); ok {
+		return httpErr
 	}
 
-	return httpErr
+	if vError, ok := err.(*validation.Error); ok {
+		return h.makeValidationError(vError).WithContext(err)
+	}
+
+	return errors.UnknownError(err)
+}
+
+// Make http validation error.
+func (h *ErrorsHandler) makeValidationError(err *validation.Error) *errors.HTTPError {
+	httpError := errors.ValidationFailedHTTPError()
+
+	if h.ValidationErrorsConverter != nil {
+		httpError.WithMeta(h.ValidationErrorsConverter.ConvertValidationErrors(
+			err.GetError(),
+			err.GetValidator(),
+		))
+	} else {
+		httpError.WithMeta(map[string]interface{}{"errors": err})
+	}
+
+	return httpError
 }

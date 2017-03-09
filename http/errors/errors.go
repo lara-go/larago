@@ -80,14 +80,3 @@ func ValidationFailedHTTPError() *HTTPError {
 		HTTPStatus: http.StatusUnprocessableEntity,
 	}
 }
-
-// ValidationError for single field.
-type ValidationError struct {
-	Field   string `json:"field"`
-	Message string `json:"message"`
-}
-
-// ValidationErrors is a set of messages for every invalid field.
-type ValidationErrors struct {
-	Errors []ValidationError `json:"errors"`
-}

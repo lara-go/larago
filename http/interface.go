@@ -1,9 +1,6 @@
 package http
 
-import (
-	"github.com/lara-go/larago/http/errors"
-	"github.com/lara-go/larago/http/responses"
-)
+import "github.com/lara-go/larago/http/responses"
 
 // Middleware interface.
 type Middleware interface {
@@ -23,15 +20,10 @@ type ErrorsHandlerContract interface {
 	Render(request *Request, err error) responses.Response
 }
 
-// ValidationErrorsConverter interface for requests validators.
-type ValidationErrorsConverter interface {
-	// ConvertValidationErrors to field - message format.
-	ConvertValidationErrors(err error, tagName string, validator interface{}) *errors.ValidationErrors
-}
-
-// SelfValidator interface for json requests.
-type SelfValidator interface {
-	Validate() error
+// ArgsInjector uses as an external source of arguments that can be injected in the route action handler.
+type ArgsInjector interface {
+	// Injects custom params to for the action.
+	Inject(params []interface{}, request *Request) ([]interface{}, error)
 }
 
 // JSONRequestValidator interface for json requests.
