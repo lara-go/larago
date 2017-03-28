@@ -24,8 +24,7 @@ type Application struct {
 	toBoot []reflect.Value
 	onBoot []func(application *Application)
 
-	appProvider ServiceProvider
-	providers   []ServiceProvider
+	providers []ServiceProvider
 
 	config       Config
 	configLoader func() Config
@@ -66,18 +65,6 @@ func (app *Application) SetConfig(config Config) *Application {
 	app.Instance(config, "config", (*Config)(nil))
 
 	return app
-}
-
-// SetApplicationServiceProvider sets default application service provider.
-func (app *Application) SetApplicationServiceProvider(provider ServiceProvider) *Application {
-	app.appProvider = provider
-
-	return app
-}
-
-// ApplicationServiceProvider sets default application service provider.
-func (app *Application) ApplicationServiceProvider() ServiceProvider {
-	return app.appProvider
 }
 
 // Config getter.
