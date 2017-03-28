@@ -1,6 +1,9 @@
 package database
 
-import "github.com/lara-go/larago"
+import (
+	"github.com/jinzhu/gorm"
+	"github.com/lara-go/larago"
+)
 
 // ServiceProvider struct.
 type ServiceProvider struct{}
@@ -20,18 +23,14 @@ func (p *ServiceProvider) Register(application *larago.Application) {
 }
 
 func (p *ServiceProvider) registerDatabaseConnection(application *larago.Application) {
-	application.Bind(func() (*Connection, error) {
-		var connection Connection
-		application.Make(&connection)
+	application.Bind(&Manager{}, "db")
 
-		// Establish database connection.
-		err := connection.Connect()
-		if err != nil {
-			return nil, err
-		}
+	application.Bind(func() (*gorm.DB, error) {
+		var manager Manager
+		application.Make(&manager)
 
-		return &connection, nil
-	})
+		return manager.GetConnection()
+	}, "db.connection")
 }
 
 func (p *ServiceProvider) registerMigrator(application *larago.Application) {

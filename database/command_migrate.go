@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 
+	"github.com/jinzhu/gorm"
 	"github.com/lara-go/larago/logger"
 
 	"github.com/urfave/cli"
@@ -10,6 +11,7 @@ import (
 
 // CommandMigrate to apply DB changes.
 type CommandMigrate struct {
+	DB       *gorm.DB
 	Migrator *Migrator
 	Logger   *logger.Logger
 }
@@ -26,7 +28,7 @@ func (c *CommandMigrate) GetCommand() cli.Command {
 // Handle command.
 func (c *CommandMigrate) Handle(args cli.Args) error {
 	// Run migrations.
-	err := c.Migrator.Migrate()
+	err := c.Migrator.Migrate(c.DB)
 	if err != nil {
 		return fmt.Errorf("Could not migrate: %v", err.Error())
 	}

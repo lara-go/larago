@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 	"time"
 
@@ -14,9 +15,12 @@ import (
 )
 
 const (
-	dateFormat     = "2006_01_02_150405"
-	migrationsPath = "./app/database/migrations"
-	migrationName  = migrationsPath + "/%s_%s.go"
+	dateFormat = "2006_01_02_150405"
+)
+
+var (
+	migrationsPath = path.Join(".", "app", "database", "migrations")
+	migrationName  = path.Join(migrationsPath, "%s_%s.go")
 )
 
 // CommandMakeMigration to apply DB changes.
@@ -30,7 +34,7 @@ func (c *CommandMakeMigration) GetCommand() cli.Command {
 	return cli.Command{
 		Name:      "make:migration",
 		Usage:     "Make new migration",
-		UsageText: "Makes new migration file in ./app/database/migrations directory.\n",
+		UsageText: fmt.Sprintf("Makes new migration file in %s directory.\n", migrationsPath),
 		Description: "Please follow this naming convension:\n" +
 			"     - CreateUsersTable\n" +
 			"     - AddNameColumnToUsersTable",
