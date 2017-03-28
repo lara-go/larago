@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 
 	"github.com/lara-go/larago/logger"
@@ -13,9 +14,9 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
-	providersPath = "./app/providers"
-	providersName = providersPath + "/%s.go"
+var (
+	providersPath = path.Join(".", "app", "providers")
+	providersName = path.Join(providersPath, "%s.go")
 )
 
 // CommandMakeProvider to apply DB changes.
