@@ -1,65 +1,82 @@
 package cache_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
+	"github.com/asaskevich/EventBus"
 	"github.com/lara-go/larago/cache"
 	"github.com/stretchr/testify/assert"
 )
 
-func factory() *cache.Repository {
+func repositoryFactory() *cache.Repository {
 	store := cache.NewInMemoryStore()
 
-	return cache.NewRepository(store)
+	repo := cache.NewRepository(store)
+	repo.Events = events()
+
+	return repo
 }
 
-func TestDefaultValues(t *testing.T) {
-	repo := factory()
+func events() *EventBus.EventBus {
+	events := EventBus.New()
+	events.Subscribe("cache.write", func(key string, duration time.Duration) {
+		fmt.Printf("Put '%s' for %s\n", key, duration)
+	})
+	events.Subscribe("cache.hit", func(key string) {
+		fmt.Printf("Hit '%s'\n", key)
+	})
+	events.Subscribe("cache.miss", func(key string) {
+		fmt.Printf("Missed '%s'\n", key)
+	})
 
-	assert.Equal(t, "default", repo.Get("test", "default"))
-	assert.Equal(t, "default", repo.Pull("test", "default"))
+	return events
 }
 
 func TestRemember(t *testing.T) {
-	repo := factory()
+	repo := repositoryFactory()
 
-	value, err := repo.Remember("test", time.Second, func() (interface{}, error) {
+	var value int
+	err := repo.Remember("remember", time.Second, func() (interface{}, error) {
 		return 1, nil
-	})
+	}, &value)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 1, value.(int))
+	assert.Equal(t, 1, value)
 
-	assert.True(t, repo.Has("test"))
-	assert.Equal(t, 1, repo.Get("test").(int))
+	assert.True(t, repo.Has("remember"))
 
 	time.Sleep(time.Second * 2)
-	assert.False(t, repo.Has("test"))
+	assert.False(t, repo.Has("remember"))
 }
 
 func TestRememberForever(t *testing.T) {
-	repo := factory()
+	repo := repositoryFactory()
 
-	value, err := repo.RememberForever("test", func() (interface{}, error) {
+	var value int
+	err := repo.RememberForever("forever", func() (interface{}, error) {
 		return 1, nil
-	})
+	}, &value)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 1, value.(int))
+	assert.Equal(t, 1, value)
 
-	assert.True(t, repo.Has("test"))
-	assert.Equal(t, 1, repo.Get("test").(int))
+	assert.True(t, repo.Has("forever"))
 
 	time.Sleep(time.Second * 2)
-	assert.True(t, repo.Has("test"))
+	assert.True(t, repo.Has("forever"))
 }
 
 func TestPull(t *testing.T) {
-	repo := factory()
+	repo := repositoryFactory()
+	var test int
 
-	assert.Nil(t, repo.Pull("test"))
-	repo.Put("test", 1, time.Minute)
-	assert.Equal(t, 1, repo.Pull("test").(int))
-	assert.False(t, repo.Has("test"))
+	assert.Equal(t, cache.ErrorMissed, repo.Pull("pull", &test))
+
+	repo.Put("pull", 1, time.Second)
+
+	assert.Nil(t, repo.Pull("pull", &test))
+	assert.Equal(t, 1, test)
+	assert.False(t, repo.Has("pull"))
 }
