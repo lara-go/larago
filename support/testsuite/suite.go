@@ -26,7 +26,6 @@ func (s *LaragoSuite) BootstrapApplication(application *larago.Application) {
 	// Run default bootstrappers.
 	err := application.BootstrapWith(
 		bootstrappers.DetectEnv,
-		bootstrappers.RegisterProviders,
 		bootstrappers.BootProviders,
 	)
 
