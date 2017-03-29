@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 
 	"github.com/lara-go/larago/logger"
@@ -13,9 +14,9 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
-	commandsPath = "./app/commands"
-	commandName  = commandsPath + "/%s.go"
+var (
+	commandsPath = path.Join(".", "app", "commands")
+	commandName  = path.Join(commandsPath, "%s.go")
 )
 
 // CommandMakeCommand to apply DB changes.

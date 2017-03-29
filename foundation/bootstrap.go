@@ -17,7 +17,6 @@ func Handle(application *larago.Application) {
 	makeKernel(application).
 		UseBootstrappers(
 			bootstrappers.DetectEnv,
-			bootstrappers.RegisterProviders,
 			bootstrappers.BootProviders,
 		).
 		WithApplication(application).

@@ -1,13 +1,12 @@
 package database
 
 import (
-	"github.com/lara-go/larago/logger"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite" // Import sqlite3 dialect
+	"github.com/lara-go/larago/logger"
 )
 
-// Connection to the database.
-type Connection struct {
+// Manager to the database.
+type Manager struct {
 	Driver string `di:"Config.Database.Driver"`
 	DSN    string `di:"Config.Database.DSN"`
 	Debug  bool   `di:"Config.App.Debug"`
@@ -17,9 +16,9 @@ type Connection struct {
 }
 
 // Connect to the database.
-func (c *Connection) Connect() error {
+func (m *Manager) Connect() error {
 	// Open connection.
-	db, err := gorm.Open(c.Driver, c.DSN)
+	db, err := gorm.Open(m.Driver, m.DSN)
 	if err != nil {
 		return err
 	}
@@ -29,25 +28,30 @@ func (c *Connection) Connect() error {
 		return err
 	}
 
-	c.Logger.Debug("Connected to %s via %s", c.DSN, c.Driver)
+	m.Logger.Debug("Connected to %s via %s", m.DSN, m.Driver)
 
-	if c.Debug {
+	if m.Debug {
 		db.LogMode(true)
 	}
 
-	c.connection = db
+	m.connection = db
 
 	return nil
 }
 
 // Disconnect from the database.
-func (c *Connection) Disconnect() {
-	if c.connection != nil {
-		c.connection.Close()
+func (m *Manager) Disconnect() {
+	if m.connection != nil {
+		m.connection.Close()
 	}
 }
 
 // GetConnection to db.
-func (c *Connection) GetConnection() *gorm.DB {
-	return c.connection
+func (m *Manager) GetConnection() (*gorm.DB, error) {
+	var err error
+	if m.connection == nil {
+		err = m.Connect()
+	}
+
+	return m.connection, err
 }

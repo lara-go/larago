@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 
+	"github.com/jinzhu/gorm"
 	"github.com/lara-go/larago/logger"
 
 	"github.com/urfave/cli"
@@ -10,6 +11,7 @@ import (
 
 // CommandMigrateRollback to apply DB changes.
 type CommandMigrateRollback struct {
+	DB       *gorm.DB
 	Migrator *Migrator
 	Logger   *logger.Logger
 }
@@ -26,7 +28,7 @@ func (c *CommandMigrateRollback) GetCommand() cli.Command {
 // Handle command.
 func (c *CommandMigrateRollback) Handle(args cli.Args) error {
 	// Roll back migrations.
-	err := c.Migrator.Rollback()
+	err := c.Migrator.Rollback(c.DB)
 	if err != nil {
 		return fmt.Errorf("Could not rollback: %v", err.Error())
 	}

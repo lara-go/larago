@@ -15,7 +15,6 @@ type Migration interface {
 
 // Migrator engine to work with migrations.
 type Migrator struct {
-	Database   *Connection
 	migrations []Migration
 }
 
@@ -25,24 +24,24 @@ func (m *Migrator) SetMigrations(migrations ...Migration) {
 }
 
 // Migrate database.
-func (m *Migrator) Migrate() error {
-	return m.makeGormigrate().Migrate()
+func (m *Migrator) Migrate(db *gorm.DB) error {
+	return m.makeGormigrate(db).Migrate()
 }
 
 // Rollback last migration.
-func (m *Migrator) Rollback() error {
-	return m.makeGormigrate().RollbackLast()
+func (m *Migrator) Rollback(db *gorm.DB) error {
+	return m.makeGormigrate(db).RollbackLast()
 }
 
 // Reset all migrations.
-func (m *Migrator) Reset() error {
+func (m *Migrator) Reset(db *gorm.DB) error {
 	return nil
 }
 
 // Make new gormigrate instance.
-func (m *Migrator) makeGormigrate() *gormigrate.Gormigrate {
+func (m *Migrator) makeGormigrate(db *gorm.DB) *gormigrate.Gormigrate {
 	return gormigrate.New(
-		m.Database.GetConnection(),
+		db,
 		gormigrate.DefaultOptions,
 		m.transformMigrations(),
 	)

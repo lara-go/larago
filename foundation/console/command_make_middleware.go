@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 
 	"github.com/lara-go/larago/logger"
@@ -13,9 +14,9 @@ import (
 	"github.com/urfave/cli"
 )
 
-const (
-	middewarePath  = "./app/middleware"
-	middlewareName = middewarePath + "/%s.go"
+var (
+	middewarePath  = path.Join(".", "app", "middleware")
+	middlewareName = path.Join(middewarePath, "%s.go")
 )
 
 // CommandMakeMiddleware to apply DB changes.
