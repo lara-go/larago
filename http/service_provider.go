@@ -17,7 +17,6 @@ func (p *ServiceProvider) Register(application *larago.Application) {
 	// Register server itself.
 	p.registerRouter(application)
 	p.registerErrorsHandler(application)
-	p.registerRequestsValidator(application)
 }
 
 func (p *ServiceProvider) registerRouter(application *larago.Application) {
@@ -26,8 +25,4 @@ func (p *ServiceProvider) registerRouter(application *larago.Application) {
 
 func (p *ServiceProvider) registerErrorsHandler(application *larago.Application) {
 	application.Bind(&ErrorsHandler{}, (*ErrorsHandlerContract)(nil))
-}
-
-func (p *ServiceProvider) registerRequestsValidator(application *larago.Application) {
-	application.Bind(&RequestsInjector{})
 }

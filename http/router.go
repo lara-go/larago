@@ -16,11 +16,10 @@ import (
 // Router struct.
 type Router struct {
 	// Dependencies
-	Container         *container.Container
-	Logger            *logger.Logger
-	RequestsValidator *RequestsInjector
-	ErrorsHandler     ErrorsHandlerContract
-	Config            larago.Config
+	Container     *container.Container
+	Logger        *logger.Logger
+	ErrorsHandler ErrorsHandlerContract
+	Config        larago.Config
 
 	// Basic httprouter.
 	router *httprouter.Router
