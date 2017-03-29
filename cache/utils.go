@@ -15,8 +15,6 @@ func setValue(target interface{}, value interface{}) (err error) {
 	}()
 
 	v := reflect.ValueOf(target)
-	// If e represents a value as opposed to a pointer, the answer won't
-	// get back to the caller. Make sure it's a pointer.
 	if v.Type().Kind() != reflect.Ptr {
 		return ErrorPtr
 	}
