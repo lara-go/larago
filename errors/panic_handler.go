@@ -11,14 +11,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// PanicHandlerInterface interface for panic handlers.
-type PanicHandlerInterface interface {
-	Defer()
-}
-
 // PanicHandler handles all panics.
-type PanicHandler struct {
-}
+type PanicHandler struct{}
 
 // Defer to handle panics.
 func (h *PanicHandler) Defer() {
