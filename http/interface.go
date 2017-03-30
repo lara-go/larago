@@ -20,6 +20,9 @@ type ErrorsHandlerContract interface {
 	Render(request *Request, err error) responses.Response
 }
 
+// BindingCallback is a function to resolve binded param value.
+type BindingCallback func(param string) (interface{}, error)
+
 // ArgsInjector uses as an external source of arguments that can be injected in the route action handler.
 type ArgsInjector interface {
 	// Injects custom params to for the action.

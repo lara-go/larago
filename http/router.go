@@ -36,6 +36,9 @@ type Router struct {
 	// Stack of group routes.
 	groupsStack []*GroupRoute
 
+	// Map of bindings and their callbacks.
+	bindings map[string]BindingCallback
+
 	// Action handler's arguments injectors.
 	argsInjectors []ArgsInjector
 }
@@ -44,6 +47,7 @@ type Router struct {
 func NewRouter() *Router {
 	router := &Router{
 		aliases:     make(map[string]*Route),
+		bindings:    make(map[string]BindingCallback),
 		groupsStack: make([]*GroupRoute, 0),
 		argsInjectors: []ArgsInjector{
 			&RouteParamsInjector{},
@@ -124,6 +128,11 @@ func (r *Router) Middleware(middleware ...Middleware) *Router {
 	return r
 }
 
+// Bind route param to the specified callback return value.
+func (r *Router) Bind(param string, callback BindingCallback) {
+	r.bindings[param] = callback
+}
+
 // Bootstrap router to be ready to handle requests.
 func (r *Router) Bootstrap() *Router {
 	for _, route := range r.routes {
@@ -178,13 +187,13 @@ func (r *Router) wrapHandlers(route *Route) httprouter.Handle {
 	return func(w net_http.ResponseWriter, req *net_http.Request, ps httprouter.Params) {
 		request := NewRequest(req)
 		request.Route = route
-		request.Route.Params = ps
-
-		// Save request to container.
-		r.Container.Instance(request)
+		request.Params = ps
 
 		// Handle panics during pipeline.
 		defer r.panicHandler(w, request)
+
+		// Save request to container.
+		r.Container.Instance(request)
 
 		// Run request through all middleware chaining one by one.
 		// then dispatch action handler itself, obtain response
@@ -212,13 +221,30 @@ func (r *Router) panicHandler(w net_http.ResponseWriter, request *Request) {
 	}
 }
 
+// Substitute bindings from request url params.
+func (r *Router) substituteBindings(request *Request) {
+	for _, param := range request.Params {
+		if callback, ok := r.bindings[param.Key]; ok {
+			result, err := callback(param.Value)
+			if err != nil {
+				panic(err)
+			}
+
+			request.Bindings = append(request.Bindings, result)
+		}
+	}
+}
+
 // Final pipeline callback.
 // Dispatches route handler and returns Response.
 func (r *Router) dispatchRequest(request *Request) responses.Response {
 	action := r.Container.Wrap(request.Route.Handler)
 
+	// Substitute bindings.
+	r.substituteBindings(request)
+
 	// Prepare params to pass to the action.
-	params := make([]interface{}, 0)
+	params := request.Bindings
 	for _, injector := range r.argsInjectors {
 		var err error
 		params, err = injector.Inject(params, request)
@@ -329,7 +355,11 @@ func (r *Router) GetMiddleware() []Middleware {
 
 // SetArgsInjectors sets additional components that can inject more custom arguments to route action handler.
 func (r *Router) SetArgsInjectors(injectors ...ArgsInjector) {
-	r.argsInjectors = append(r.argsInjectors, injectors...)
+	for _, injector := range injectors {
+		r.Container.Make(injector)
+
+		r.argsInjectors = append(r.argsInjectors, injector)
+	}
 }
 
 // SetNotFoundHandler allowes to set custom NotFound handler.

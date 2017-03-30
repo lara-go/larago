@@ -11,18 +11,22 @@ import (
 	"strings"
 
 	"github.com/gorilla/schema"
+	"github.com/julienschmidt/httprouter"
 )
 
 // Request handles http request.
 type Request struct {
-	request *net_http.Request
-	Route   *Route
+	request  *net_http.Request
+	Route    *Route
+	Params   httprouter.Params
+	Bindings []interface{}
 }
 
 // NewRequest constructor.
 func NewRequest(netRequest *net_http.Request) *Request {
 	return &Request{
-		request: netRequest,
+		request:  netRequest,
+		Bindings: make([]interface{}, 0),
 	}
 }
 
@@ -133,8 +137,8 @@ func (r *Request) HasCookie(name string) bool {
 }
 
 // Param returns route param.
-func (r *Request) Param(name string) string {
-	return r.Route.Params.ByName(name)
+func (r *Request) Param(name string) interface{} {
+	return r.Params.ByName(name)
 }
 
 // Query returns query params.
@@ -176,7 +180,7 @@ func (r *Request) ReadQuery(target interface{}) error {
 func (r *Request) ParamValues() url.Values {
 	values := make(url.Values)
 
-	for _, param := range r.Route.Params {
+	for _, param := range r.Params {
 		values.Add(param.Key, param.Value)
 	}
 

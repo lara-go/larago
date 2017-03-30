@@ -304,3 +304,23 @@ func TestGroupsAndMiddleware(t *testing.T) {
 	e.GET("/group1/path1").Expect().Status(200).Body().Equal("Group1 path Second First Zero")
 	e.GET("/group1/group2/path2").Expect().Status(200).Body().Equal("Group2 path First Zero")
 }
+
+func TestBindings(t *testing.T) {
+	router := factory()
+
+	router.GET("/foo/:bar").Action(func(bar string) string {
+		return bar
+	})
+
+	router.Bind("bar", func(param string) (interface{}, error) {
+		if param == "bar" {
+			return "baz", nil
+		}
+
+		return "bar", nil
+	})
+
+	e := testsuite.NewHTTPExpect(router.Bootstrap().GetHTTPRouter(), t)
+	e.GET("/foo/bar").Expect().Status(200).Body().Equal("baz")
+	e.GET("/foo/baz").Expect().Status(200).Body().Equal("bar")
+}
