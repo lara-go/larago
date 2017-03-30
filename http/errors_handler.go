@@ -57,9 +57,9 @@ func (h *ErrorsHandler) makeHTTPError(err error) *errors.HTTPError {
 	case *errors.HTTPError:
 		return e
 	case *validation.Error:
-		return h.makeValidationError(e).WithContext(err)
+		return h.makeValidationError(e)
 	case *database.ModelNotFoundError:
-		return h.makeModelNotFoundError(e).WithContext(e)
+		return h.makeModelNotFoundError(e)
 	default:
 		return errors.UnknownError(err, h.Debug)
 	}
@@ -72,7 +72,7 @@ func (h *ErrorsHandler) makeModelNotFoundError(err *database.ModelNotFoundError)
 		e.Body.Message = err.Error()
 	}
 
-	return e
+	return e.WithContext(err)
 }
 
 // Make http validation error.
@@ -90,5 +90,5 @@ func (h *ErrorsHandler) makeValidationError(err *validation.Error) *errors.HTTPE
 		})
 	}
 
-	return httpError
+	return httpError.WithContext(err)
 }
