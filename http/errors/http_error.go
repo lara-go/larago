@@ -1,7 +1,5 @@
 package errors
 
-import "net/http"
-
 // Body of the error.
 // Contains basic error info.
 type Body struct {
@@ -17,19 +15,6 @@ type HTTPError struct {
 	Context      interface{} `json:"-"`
 	ShouldReport bool        `json:"-"`
 	HasTrace     bool        `json:"-"`
-}
-
-// UnknownError generate HTTP error from unknown error.
-func UnknownError(err error) *HTTPError {
-	return &HTTPError{
-		Body: Body{
-			ID:      "internal_server_error",
-			Message: err.Error(),
-		},
-		HTTPStatus:   http.StatusInternalServerError,
-		ShouldReport: true,
-		HasTrace:     true,
-	}
 }
 
 // Error returns error message.

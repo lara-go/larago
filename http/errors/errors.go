@@ -80,3 +80,13 @@ func ValidationFailedHTTPError() *HTTPError {
 		HTTPStatus: http.StatusUnprocessableEntity,
 	}
 }
+
+// UnknownError generate HTTP error from unknown error.
+func UnknownError(err error, debug bool) *HTTPError {
+	e := InternalServerErrorHTTPError()
+	if debug {
+		e.Body.Message = err.Error()
+	}
+
+	return e.WithContext(err)
+}
