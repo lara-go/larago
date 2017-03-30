@@ -10,6 +10,7 @@ import (
 	ozzo "github.com/go-ozzo/ozzo-validation"
 	"github.com/lara-go/larago"
 	"github.com/lara-go/larago/container"
+	"github.com/lara-go/larago/database"
 	"github.com/lara-go/larago/http"
 	"github.com/lara-go/larago/http/errors"
 	"github.com/lara-go/larago/http/responses"
@@ -137,16 +138,21 @@ func TestErrors(t *testing.T) {
 		panic("Panic!")
 	})
 
+	router.GET("/model-not-found").Action(func() error {
+		panic(&database.ModelNotFoundError{})
+	})
+
 	e := testsuite.NewHTTPExpect(router.Bootstrap().GetHTTPRouter(), t)
 
 	e.GET("/http-error").Expect().Status(404)
 	e.POST("/http-error").Expect().Status(405)
 
-	e.GET("/custom-error").Expect().Status(500).Body().Equal("Custom error")
+	e.GET("/custom-error").Expect().Status(500).Body().Equal("The server encountered an internal error or misconfiguration and was unable to complete your request.")
 	e.GET("/custom-error").WithHeader("Accept", "application/json").
 		Expect().Status(500).JSON().Object().ContainsKey("error")
 
 	e.GET("/panic").Expect().Status(500)
+	e.GET("/model-not-found").Expect().Status(404)
 	e.GET("/not-found").Expect().Status(404)
 }
 
