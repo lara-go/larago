@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/lara-go/larago/database"
 	"github.com/lara-go/larago/http/errors"
 	"github.com/lara-go/larago/http/responses"
 	"github.com/lara-go/larago/logger"
@@ -52,15 +53,26 @@ func (h *ErrorsHandler) Render(request *Request, err error) responses.Response {
 
 // Make HTTPError instance from custom error.
 func (h *ErrorsHandler) makeHTTPError(err error) *errors.HTTPError {
-	if httpErr, ok := err.(*errors.HTTPError); ok {
-		return httpErr
+	switch e := err.(type) {
+	case *errors.HTTPError:
+		return e
+	case *validation.Error:
+		return h.makeValidationError(e).WithContext(err)
+	case *database.ModelNotFoundError:
+		return h.makeModelNotFoundError(e).WithContext(e)
+	default:
+		return errors.UnknownError(err, h.Debug)
+	}
+}
+
+// Make http error for model not found errors.
+func (h *ErrorsHandler) makeModelNotFoundError(err *database.ModelNotFoundError) *errors.HTTPError {
+	e := errors.NotFoundHTTPError()
+	if h.Debug {
+		e.Body.Message = err.Error()
 	}
 
-	if vError, ok := err.(*validation.Error); ok {
-		return h.makeValidationError(vError).WithContext(err)
-	}
-
-	return errors.UnknownError(err)
+	return e
 }
 
 // Make http validation error.
@@ -73,7 +85,9 @@ func (h *ErrorsHandler) makeValidationError(err *validation.Error) *errors.HTTPE
 			err.GetValidator(),
 		))
 	} else {
-		httpError.WithMeta(map[string]interface{}{"errors": err})
+		httpError.WithMeta(map[string]interface{}{
+			"errors": err,
+		})
 	}
 
 	return httpError
