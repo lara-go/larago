@@ -161,14 +161,16 @@ func (app *Application) ResolveTag(tag string, container *container.Container) i
 func (app *Application) Run() {
 	defer app.panicHandler()
 
-	kernel := app.Get((*Kernel)(nil)).(Kernel)
+	var kernel Kernel
+	app.Assign(&kernel)
 
 	kernel.Handle()
 }
 
 // Handle panics.
 func (app *Application) panicHandler() {
-	panicHandler := app.Get((*PanicHandler)(nil)).(PanicHandler)
+	var panicHandler PanicHandler
+	app.Assign(&panicHandler)
 
 	panicHandler.Defer()
 }
