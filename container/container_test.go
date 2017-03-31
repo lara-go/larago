@@ -71,6 +71,11 @@ func TestInterfaceBind(t *testing.T) {
 		assert.NotNil(t, tester)
 		assert.Exactly(t, b, tester)
 	})
+
+	assert.Panics(t, func() {
+		var tester Tester
+		c.Assign(tester)
+	})
 }
 
 func TestAliasBind(t *testing.T) {
