@@ -159,8 +159,10 @@ func (app *Application) ResolveTag(tag string, container *container.Container) i
 
 // Run application.
 func (app *Application) Run() {
+	// Set defer panic handle.
 	defer app.panicHandler()
 
+	// Get Kernel from container and handle request.
 	var kernel Kernel
 	app.Assign(&kernel)
 
