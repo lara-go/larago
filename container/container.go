@@ -60,6 +60,15 @@ func (c *Container) Instance(concrete interface{}, aliases ...interface{}) {
 	}
 }
 
+// Unbind removes binding or resolved instance from container.
+func (c *Container) Unbind(abstract interface{}) {
+	// Mute all "not-found" panics.
+	defer func() {}()
+
+	c.Bindings.Remove(abstract)
+	c.Instances.Remove(abstract)
+}
+
 // Make abstract value from concrete binding.
 func (c *Container) makeBinding(concrete interface{}) reflect.Type {
 	t := reflect.TypeOf(concrete)
