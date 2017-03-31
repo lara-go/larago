@@ -24,5 +24,5 @@ func (p *ServiceProvider) registerRouter(application *larago.Application) {
 }
 
 func (p *ServiceProvider) registerErrorsHandler(application *larago.Application) {
-	application.Bind(&ErrorsHandler{}, (*ErrorsHandlerContract)(nil))
+	application.Bind(&ErrorsHandler{}, (*ErrorsHandlerInterface)(nil))
 }

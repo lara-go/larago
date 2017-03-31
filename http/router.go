@@ -18,7 +18,7 @@ type Router struct {
 	// Dependencies
 	Container     *container.Container
 	Logger        *logger.Logger
-	ErrorsHandler ErrorsHandlerContract
+	ErrorsHandler ErrorsHandlerInterface
 	Config        larago.Config
 
 	// Basic httprouter.

@@ -11,8 +11,8 @@ type Middleware interface {
 // Handler function.
 type Handler func(request *Request) responses.Response
 
-// ErrorsHandlerContract for every handler to resolve errors during http calls..
-type ErrorsHandlerContract interface {
+// ErrorsHandlerInterface for every handler to resolve errors during http calls..
+type ErrorsHandlerInterface interface {
 	// Report error to logger.
 	Report(err error)
 
