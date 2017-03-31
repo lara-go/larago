@@ -40,28 +40,28 @@ func (b *Bindings) Has(abstract interface{}) bool {
 
 // Get binding by abstract value.
 func (b *Bindings) Get(abstract interface{}) *reflect.Value {
-	alias := normalizeAbstract(abstract)
-
-	if !b.Has(alias) {
-		panic(fmt.Errorf("Unknown service: %s", alias))
-	}
-
 	b.lock.RLock()
 	defer b.lock.RUnlock()
+
+	alias := normalizeAbstract(abstract)
+
+	if _, exists := b.items[alias]; !exists {
+		panic(fmt.Errorf("Unknown service: %s", alias))
+	}
 
 	return b.items[alias]
 }
 
 // Remove binding by abstract value.
 func (b *Bindings) Remove(abstract interface{}) {
-	alias := normalizeAbstract(abstract)
-
-	if !b.Has(alias) {
-		panic(fmt.Errorf("Unknown service: %s", alias))
-	}
-
 	b.lock.RLock()
 	defer b.lock.RUnlock()
+
+	alias := normalizeAbstract(abstract)
+
+	if _, exists := b.items[alias]; !exists {
+		panic(fmt.Errorf("Unknown service: %s", alias))
+	}
 
 	delete(b.items, alias)
 }
