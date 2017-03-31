@@ -91,6 +91,20 @@ func (c *Container) Get(abstract interface{}) interface{} {
 	return c.resolveService(abstract).Interface()
 }
 
+// Assign binding to the target.
+func (c *Container) Assign(target interface{}) {
+	v := reflect.ValueOf(target)
+	t := v.Type()
+
+	if t.Kind() != reflect.Ptr {
+		panic(fmt.Errorf("Container can only Assign value if pointer to the variable was provided"))
+	}
+
+	value := c.resolveService(t)
+
+	v.Elem().Set(*value)
+}
+
 //
 func (c *Container) resolveService(abstract interface{}) *reflect.Value {
 	resolved, err := c.resolveBinding(abstract)
