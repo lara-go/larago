@@ -11,6 +11,21 @@ type ServiceProvider interface {
 	Register(application *Application)
 }
 
+// PanicHandler provides interface to handle panic throws.
+type PanicHandler interface {
+	// Defer handles panics.
+	Defer()
+}
+
+// Kernel interface.
+type Kernel interface {
+	// Handle console command.
+	Handle()
+
+	// SetBootstrappers sets Application bootstrappers.
+	SetBootstrappers(bootstrappers ...Bootstrapper)
+}
+
 // ConsoleCommand interface.
 type ConsoleCommand interface {
 	// GetCommand for the cli to register.

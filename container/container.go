@@ -31,11 +31,6 @@ func New() *Container {
 	return container
 }
 
-// SetTagsResolver setter for tags resolvers.
-func (c *Container) SetTagsResolver(resolver TagsResolver) {
-	c.tagsResolvers = append(c.tagsResolvers, resolver)
-}
-
 // Bind registers instance in container.
 func (c *Container) Bind(concrete interface{}, aliases ...interface{}) {
 	binding := c.makeBinding(concrete)
@@ -232,6 +227,11 @@ func (c *Container) tryTagsResolver(tag string) interface{} {
 	}
 
 	return nil
+}
+
+// SetTagsResolver setter for tags resolvers.
+func (c *Container) SetTagsResolver(resolver TagsResolver) {
+	c.tagsResolvers = append(c.tagsResolvers, resolver)
 }
 
 // Call function resolving its params.

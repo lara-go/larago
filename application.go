@@ -17,12 +17,10 @@ type Application struct {
 	HomeDirectory  string
 	DateTimeFormat string
 
-	bootstrapped  bool
-	bootstrappers []Bootstrapper
+	bootstrapped bool
 
 	booted bool
 	toBoot []reflect.Value
-	onBoot []func(application *Application)
 
 	providers []ServiceProvider
 
@@ -109,22 +107,17 @@ func (app *Application) GetCommands() []ConsoleCommand {
 
 // Boot Application.
 func (app *Application) Boot() error {
-	var err error
+	if app.booted {
+		return nil
+	}
 
-	if !app.booted {
-		app.booted = true
-
-		for _, bootable := range app.toBoot {
-			if err = app.bootProvider(bootable); err != nil {
-				return err
-			}
+	for _, bootable := range app.toBoot {
+		if err := app.bootProvider(bootable); err != nil {
+			return err
 		}
 	}
 
-	// Run onBoot callbacks.
-	for _, callback := range app.onBoot {
-		callback(app)
-	}
+	app.booted = true
 
 	return nil
 }
@@ -138,17 +131,17 @@ func (app *Application) bootProvider(boot reflect.Value) error {
 
 // BootstrapWith runs bootstrappers one by one to populate and prepare application.
 func (app *Application) BootstrapWith(boostrappers ...Bootstrapper) error {
-	var err error
+	if app.bootstrapped {
+		return nil
+	}
 
-	if !app.bootstrapped {
-		app.bootstrapped = true
-
-		for _, bootstrapper := range boostrappers {
-			if err = bootstrapper(app); err != nil {
-				return err
-			}
+	for _, bootstrapper := range boostrappers {
+		if err := bootstrapper(app); err != nil {
+			return err
 		}
 	}
+
+	app.bootstrapped = true
 
 	return nil
 }
@@ -162,4 +155,20 @@ func (app *Application) ResolveTag(tag string, container *container.Container) i
 	}
 
 	return resolved
+}
+
+// Run application.
+func (app *Application) Run() {
+	defer app.panicHandler()
+
+	kernel := app.Get((*Kernel)(nil)).(Kernel)
+
+	kernel.Handle()
+}
+
+// Handle panics.
+func (app *Application) panicHandler() {
+	panicHandler := app.Get((*PanicHandler)(nil)).(PanicHandler)
+
+	panicHandler.Defer()
 }
