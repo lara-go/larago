@@ -59,7 +59,7 @@ func (k *Kernel) getGlobalFlags() []cli.Flag {
 			Usage: "path to .env config file",
 		},
 		cli.StringFlag{
-			Name:  "home, r",
+			Name:  "home, H",
 			Value: k.Application.HomeDirectory,
 			Usage: "path to home directory",
 		},
