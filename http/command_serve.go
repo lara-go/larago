@@ -8,7 +8,7 @@ import (
 // CommandServe command.
 type CommandServe struct {
 	Router *Router
-	Config larago.Config
+	Config *larago.ConfigRepository
 
 	listen string
 }

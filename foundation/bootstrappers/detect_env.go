@@ -13,10 +13,13 @@ func DetectEnv(application *larago.Application) error {
 	home := getHomeDirectory(application.HomeDirectory)
 	dotEnv := getConfigFile(path.Join(home, ".env"))
 
-	godotenv.Load(dotEnv)
+	// Load env variables.
+	if err := godotenv.Load(dotEnv); err != nil {
+		return err
+	}
 
-	config := application.ConfigLoader()()
-	application.SetConfig(config)
+	// Import config to application.
+	application.ImportConfig()
 
 	return nil
 }

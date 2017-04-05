@@ -24,8 +24,8 @@ type Application struct {
 
 	providers []ServiceProvider
 
-	config       Config
-	configLoader func() Config
+	config       *ConfigRepository
+	configLoader ConfigLoader
 
 	commands []ConsoleCommand
 }
@@ -45,28 +45,26 @@ func New() *Application {
 	return instance
 }
 
-// SetConfigLoader callback that loads config while bootstrapping.
-func (app *Application) SetConfigLoader(loader func() Config) *Application {
+// SetConfig callback that loads config while bootstrapping.
+func (app *Application) SetConfig(loader ConfigLoader) *Application {
 	app.configLoader = loader
 
 	return app
 }
 
-// ConfigLoader returns callback that loads config while bootstrapping.
-func (app *Application) ConfigLoader() func() Config {
-	return app.configLoader
-}
+// ImportConfig of the application.
+func (app *Application) ImportConfig() *Application {
+	// Resolve config repository.
+	app.config = &ConfigRepository{app.configLoader()}
 
-// SetConfig of the application.
-func (app *Application) SetConfig(config Config) *Application {
-	app.config = config
-	app.Instance(config, "config", (*Config)(nil))
+	// Save it to container.
+	app.Instance(app.config, "config", (*Config)(nil))
 
 	return app
 }
 
 // Config getter.
-func (app *Application) Config() Config {
+func (app *Application) Config() *ConfigRepository {
 	return app.config
 }
 

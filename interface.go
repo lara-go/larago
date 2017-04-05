@@ -35,6 +35,9 @@ type ConsoleCommand interface {
 	Handle(args cli.Args) error
 }
 
+// ConfigLoader is a callback function for lazy loading application config.
+type ConfigLoader func() Config
+
 // Config interface.
 type Config interface {
 	// Env returns current environment name.
@@ -42,10 +45,4 @@ type Config interface {
 
 	// Debug returs debug mode state.
 	Debug() bool
-
-	// Get value from config using dot-notation.
-	Get(key string) interface{}
-
-	// Set value to config using dot-notation.
-	Set(key string, value interface{})
 }
