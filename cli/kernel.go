@@ -22,6 +22,7 @@ func NewKernel() *Kernel {
 
 	kernel.SetBootstrappers(
 		bootstrappers.DetectEnv,
+		bootstrappers.LoadConfig,
 		bootstrappers.BootProviders,
 	)
 

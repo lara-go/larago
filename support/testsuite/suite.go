@@ -25,7 +25,7 @@ type LaragoSuite struct {
 func (s *LaragoSuite) BootstrapApplication(application *larago.Application) {
 	// Run default bootstrappers.
 	err := application.BootstrapWith(
-		bootstrappers.DetectEnv,
+		bootstrappers.LoadConfig,
 		bootstrappers.BootProviders,
 	)
 

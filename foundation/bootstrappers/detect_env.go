@@ -19,9 +19,6 @@ func DetectEnv(application *larago.Application) error {
 		return fmt.Errorf("Can't load .env file in %s", home)
 	}
 
-	// Import config to application.
-	application.ImportConfig()
-
 	return nil
 }
 
