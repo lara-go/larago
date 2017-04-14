@@ -81,6 +81,17 @@ func ValidationFailedHTTPError() *HTTPError {
 	}
 }
 
+// ServiceUnavailableHTTPError error.
+func ServiceUnavailableHTTPError() *HTTPError {
+	return &HTTPError{
+		Body: Body{
+			ID:      "service_unavailable",
+			Message: "Service is currently unable to handle the HTTP request.",
+		},
+		HTTPStatus: http.StatusServiceUnavailable,
+	}
+}
+
 // UnknownError generate HTTP error from unknown error.
 func UnknownError(err error, debug bool) *HTTPError {
 	e := InternalServerErrorHTTPError()

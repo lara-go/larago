@@ -2,7 +2,6 @@ package cli
 
 import (
 	"os"
-	"path"
 
 	"github.com/lara-go/larago"
 	"github.com/lara-go/larago/foundation/bootstrappers"
@@ -56,14 +55,10 @@ func (k *Kernel) Handle() {
 func (k *Kernel) getGlobalFlags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{
-			Name:  "config, c",
-			Value: path.Join(k.Application.HomeDirectory, ".env"),
-			Usage: "path to .env config file",
-		},
-		cli.StringFlag{
-			Name:  "home, r",
-			Value: k.Application.HomeDirectory,
-			Usage: "path to home directory",
+			Name:        "home, r",
+			Value:       k.Application.HomeDirectory,
+			Usage:       "path to home directory",
+			Destination: &k.Application.HomeDirectory,
 		},
 	}
 }
