@@ -36,7 +36,9 @@ func (k *Kernel) SetBootstrappers(bootstrappers ...larago.Bootstrapper) {
 
 // Handle console commands.
 func (k *Kernel) Handle() {
-	k.Application.BootstrapWith(k.bootstrappers...)
+	if err := k.Application.BootstrapWith(k.bootstrappers...); err != nil {
+		panic(err)
+	}
 
 	app := cli.NewApp()
 
@@ -59,7 +61,7 @@ func (k *Kernel) getGlobalFlags() []cli.Flag {
 			Usage: "path to .env config file",
 		},
 		cli.StringFlag{
-			Name:  "home, H",
+			Name:  "home, r",
 			Value: k.Application.HomeDirectory,
 			Usage: "path to home directory",
 		},

@@ -55,7 +55,9 @@ func (app *Application) SetConfig(loader ConfigLoader) *Application {
 // ImportConfig of the application.
 func (app *Application) ImportConfig() *Application {
 	// Resolve config repository.
-	app.config = &ConfigRepository{app.configLoader()}
+	app.config = &ConfigRepository{
+		config: app.configLoader(),
+	}
 
 	// Save it to container.
 	app.Instance(app.config, "config", (*Config)(nil))

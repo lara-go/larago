@@ -1,6 +1,7 @@
 package bootstrappers
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -15,7 +16,7 @@ func DetectEnv(application *larago.Application) error {
 
 	// Load env variables.
 	if err := godotenv.Load(dotEnv); err != nil {
-		return err
+		return fmt.Errorf("Can't load .env file in %s", home)
 	}
 
 	// Import config to application.
