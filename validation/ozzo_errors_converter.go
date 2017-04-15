@@ -3,8 +3,8 @@ package validation
 import (
 	"reflect"
 
-	"git.acronis.com/ci/ci-2x-ipn/app/support/utils"
 	ozzo "github.com/go-ozzo/ozzo-validation"
+	"github.com/lara-go/larago/support/utils"
 )
 
 // OzzoErrorsConverter converts ozzo-validation errors into valid meta.
