@@ -56,7 +56,7 @@ func (k *Kernel) Handle() {
 func (k *Kernel) getGlobalFlags() []cli.Flag {
 	return []cli.Flag{
 		cli.StringFlag{
-			Name:        "home, r",
+			Name:        "home, H",
 			Value:       k.Application.HomeDirectory,
 			Usage:       "path to home directory",
 			Destination: &k.Application.HomeDirectory,

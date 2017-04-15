@@ -15,18 +15,23 @@ func DetectEnv(application *larago.Application) error {
 	dotEnv := getConfigFile(path.Join(home, ".env"))
 
 	// Load env variables.
-	if err := godotenv.Load(dotEnv); err != nil {
-		return fmt.Errorf("Can't load .env file in %s", home)
-	}
+	err := godotenv.Load(dotEnv)
 
-	return nil
+	switch err {
+	case os.ErrPermission:
+		return fmt.Errorf("Can't load %s file. Check permissions", dotEnv)
+	case os.ErrNotExist:
+		return nil
+	default:
+		return err
+	}
 }
 
 // Get home directory path.
 // TODO: fix this dirty hack!
 func getHomeDirectory(defaultHome string) string {
 	for i, val := range os.Args {
-		if (val == "-r" || val == "--home") && len(os.Args) >= i+2 {
+		if (val == "-H" || val == "--home") && len(os.Args) >= i+2 {
 			return os.Args[i+1]
 		}
 	}
