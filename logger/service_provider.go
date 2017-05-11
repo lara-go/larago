@@ -18,5 +18,5 @@ func (p *ServiceProvider) Register(application *larago.Application) {
 			DebugMode:      !application.Env("production") || application.Config().Debug(),
 			Logger:         log.New(os.Stdout, "", 0),
 		}, nil
-	})
+	}, "logger")
 }
