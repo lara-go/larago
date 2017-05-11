@@ -11,10 +11,19 @@ type ServiceProvider interface {
 	Register(application *Application)
 }
 
-// PanicHandler provides interface to handle panic throws.
-type PanicHandler interface {
+// ExitHandler provides interface to handle application exits and panic throws.
+type ExitHandler interface {
+	// Exit application gracefully with message and code.
+	Exit(message string, exitCode int)
+
 	// Defer handles panics.
 	Defer()
+}
+
+// SignalsHandler provides interface to handle system signals.
+type SignalsHandler interface {
+	// CatchInterrupt handles sigterm.
+	CatchInterrupt()
 }
 
 // Kernel interface.

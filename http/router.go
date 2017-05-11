@@ -4,6 +4,7 @@ import (
 	"fmt"
 	net_http "net/http"
 
+	"github.com/asaskevich/EventBus"
 	"github.com/lara-go/larago"
 	"github.com/lara-go/larago/container"
 	"github.com/lara-go/larago/http/errors"
@@ -18,6 +19,7 @@ type Router struct {
 	// Dependencies
 	Container     *container.Container
 	Logger        *logger.Logger
+	Events        *EventBus.EventBus
 	ErrorsHandler ErrorsHandlerInterface
 	Config        larago.Config
 
@@ -318,6 +320,10 @@ func (r *Router) sendRedirect(redirect *responses.Redirect, request *Request, w 
 
 // Send common response.
 func (r *Router) sendResponse(response responses.Response, request *Request, w net_http.ResponseWriter) {
+	if r.Events != nil {
+		r.Events.Publish("router:request-handled", request, response)
+	}
+
 	// Send content type.
 	w.Header().Set("content-type", response.ContentType()+"; charset=utf-8")
 

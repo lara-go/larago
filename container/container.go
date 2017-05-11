@@ -91,7 +91,7 @@ func (c *Container) Get(abstract interface{}) interface{} {
 	return c.resolveService(abstract).Interface()
 }
 
-// Assign binding to the target.
+// Assign interface binding to the target.
 func (c *Container) Assign(target interface{}) {
 	t := reflect.TypeOf(target)
 

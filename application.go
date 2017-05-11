@@ -77,19 +77,23 @@ func (app *Application) Env(name string) bool {
 
 // Register service.
 func (app *Application) Register(providers ...ServiceProvider) {
-	var method reflect.Value
-
 	for _, provider := range providers {
 		provider.Register(app)
 
-		method = reflect.ValueOf(provider).MethodByName("Boot")
-		if method.IsValid() {
+		if method := reflect.ValueOf(provider).MethodByName("Boot"); method.IsValid() {
 			if app.booted {
 				app.bootProvider(method)
 			} else {
 				app.toBoot = append(app.toBoot, method)
 			}
 		}
+	}
+}
+
+// Facade registers application facades.
+func (app *Application) Facade(wrappers ...*Facade) {
+	for _, wrapper := range wrappers {
+		wrapper.Application = app
 	}
 }
 
@@ -159,8 +163,9 @@ func (app *Application) ResolveTag(tag string, container *container.Container) i
 
 // Run application.
 func (app *Application) Run() {
-	// Set defer panic handle.
-	defer app.panicHandler()
+	app.catchSignals()
+
+	defer app.exitHandler()
 
 	// Get Kernel from container and handle request.
 	var kernel Kernel
@@ -169,10 +174,17 @@ func (app *Application) Run() {
 	kernel.Handle()
 }
 
-// Handle panics.
-func (app *Application) panicHandler() {
-	var panicHandler PanicHandler
-	app.Assign(&panicHandler)
+func (app *Application) exitHandler() {
+	var exitHandler ExitHandler
+	app.Assign(&exitHandler)
 
-	panicHandler.Defer()
+	// Set defer panic handle.
+	exitHandler.Defer()
+}
+
+func (app *Application) catchSignals() {
+	var signalsHandler SignalsHandler
+	app.Assign(&signalsHandler)
+
+	signalsHandler.CatchInterrupt()
 }
